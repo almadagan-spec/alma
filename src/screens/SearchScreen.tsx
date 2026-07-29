@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useAppContext } from "../AppContext";
+import BackButton from "../components/BackButton";
 import RestaurantAutocomplete from "../components/RestaurantAutocomplete";
 import "./SearchScreen.css";
 
@@ -10,6 +11,7 @@ export default function SearchScreen() {
   return (
     <div className="screen search-screen">
       <div className="search-content">
+        <BackButton />
         <h1>Type restaurant name</h1>
 
         <RestaurantAutocomplete

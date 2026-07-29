@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppContext } from "../AppContext";
+import BackButton from "../components/BackButton";
+import Modal from "../components/Modal";
 import RestaurantAutocomplete from "../components/RestaurantAutocomplete";
 import {
   getPlaceDetails,
@@ -55,18 +57,11 @@ export default function MyListScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [restaurantList]);
 
-  useEffect(() => {
-    if (!isAddOpen) return;
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setIsAddOpen(false);
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [isAddOpen]);
-
   return (
     <div className="screen my-list-screen">
       <div className="my-list-content">
+        <BackButton />
+
         <div className="list-header">
           <h1>My restaurants</h1>
           <div className="header-actions">
@@ -137,24 +132,22 @@ export default function MyListScreen() {
       </div>
 
       {isAddOpen && (
-        <div className="modal-backdrop" onClick={() => setIsAddOpen(false)}>
-          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
-            <h2>Add a restaurant</h2>
-            <RestaurantAutocomplete
-              autoFocus
-              onSelect={(prediction) => {
-                addRestaurant({
-                  id: prediction.placeId,
-                  name: prediction.mainText,
-                  address: prediction.secondaryText,
-                  placeId: prediction.placeId,
-                  checked: true,
-                });
-                setIsAddOpen(false);
-              }}
-            />
-          </div>
-        </div>
+        <Modal onClose={() => setIsAddOpen(false)}>
+          <h2>Add a restaurant</h2>
+          <RestaurantAutocomplete
+            autoFocus
+            onSelect={(prediction) => {
+              addRestaurant({
+                id: prediction.placeId,
+                name: prediction.mainText,
+                address: prediction.secondaryText,
+                placeId: prediction.placeId,
+                checked: true,
+              });
+              setIsAddOpen(false);
+            }}
+          />
+        </Modal>
       )}
     </div>
   );

@@ -20,6 +20,12 @@ export interface ReservationDetails {
   website: string | null;
   mapsUrl: string | null;
   periods: OpeningPeriod[] | null;
+  /**
+   * Whether a card is required to hold the reservation. Google's Places API
+   * has no such signal, so real (non-demo) results always report this as
+   * null (unknown) rather than guessing.
+   */
+  requiresCard: boolean | null;
 }
 
 const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
@@ -173,6 +179,7 @@ export async function getReservationDetails(
                 ? { day: p.close.day, hours: p.close.hours, minutes: p.close.minutes }
                 : undefined,
             })) ?? null,
+          requiresCard: null,
         });
       },
     );
