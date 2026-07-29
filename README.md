@@ -4,22 +4,30 @@ A one-stop app for building your own restaurant reservation list.
 
 ## Current flow
 
-1. **Sign up** (`/signup`) — first-time users enter full name, email,
-   phone number, password, and repeat password. If the passwords don't
-   match, both fields outline in red and "Save and continue" is disabled
-   until they match.
+1. **Sign up** (`/signup`) — real accounts via Supabase Auth: full name,
+   email, phone number, password, repeat password. Passwords must match
+   before "Save and continue" is enabled. If the project requires email
+   confirmation, a "check your email" screen follows instead of signing
+   you straight in. **Log in** (`/login`) handles returning users.
 2. **Welcome** (`/welcome`) — a single centered "Create your restaurant
    list" button.
 3. **Search** (`/search`) — a search bar titled "Type restaurant name"
    with live autocomplete. Selecting a suggestion adds it to your list,
    checked.
 4. **My restaurants** (`/my-list`) — the full list with live address and
-   hours from Google, a `+` popup to add more, and a reservation link per
-   restaurant: "Reserve on Tabit" / "Reserve on Ontopo" when detected, a
-   tap-to-call number otherwise.
+   hours from Google, a `+` popup to add more, a reservation link per
+   restaurant ("Reserve on Tabit" / "Reserve on Ontopo" / a tap-to-call
+   number), a **Share list** button, and a **Shared with me** button.
+5. **Share list** — enter an email; once that person creates an account
+   (or logs in) with the same address, your list appears for them under
+   "Shared with me."
+6. **Shared with me** (`/shared`) — every list shared with you, by owner
+   name. Opening one (`/shared/:ownerId`) shows the same list view,
+   fully editable — you can add restaurants to someone else's shared
+   list the same way you would your own.
 
-State (user + list) is persisted to `localStorage`, so reloading keeps
-you on the right screen.
+Accounts and restaurant lists live in Supabase (Postgres), not
+`localStorage`, so they're real across devices and browsers.
 
 ## Getting started
 

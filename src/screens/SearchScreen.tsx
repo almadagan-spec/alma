@@ -1,12 +1,16 @@
 import { useNavigate } from "react-router-dom";
-import { useAppContext } from "../AppContext";
+import { useAuth } from "../AuthContext";
 import BackButton from "../components/BackButton";
 import RestaurantAutocomplete from "../components/RestaurantAutocomplete";
+import { useRestaurantList } from "../hooks/useRestaurantList";
 import "./SearchScreen.css";
 
 export default function SearchScreen() {
   const navigate = useNavigate();
-  const { restaurantList, addRestaurant, toggleRestaurant } = useAppContext();
+  const { authUser } = useAuth();
+  const { items, addRestaurant, toggleRestaurant } = useRestaurantList(
+    authUser?.id ?? null,
+  );
 
   return (
     <div className="screen search-screen">
@@ -18,11 +22,9 @@ export default function SearchScreen() {
           autoFocus
           onSelect={(prediction) =>
             addRestaurant({
-              id: prediction.placeId,
+              placeId: prediction.placeId,
               name: prediction.mainText,
               address: prediction.secondaryText,
-              placeId: prediction.placeId,
-              checked: true,
             })
           }
         />
@@ -30,15 +32,15 @@ export default function SearchScreen() {
         <div className="my-list">
           <h2>Your list</h2>
 
-          {restaurantList.length > 0 ? (
+          {items.length > 0 ? (
             <ul>
-              {restaurantList.map((item) => (
+              {items.map((item) => (
                 <li key={item.id}>
                   <label className="list-item">
                     <input
                       type="checkbox"
                       checked={item.checked}
-                      onChange={() => toggleRestaurant(item.id)}
+                      onChange={() => toggleRestaurant(item)}
                     />
                     <span className="list-item-text">
                       <span className="main-text">{item.name}</span>
@@ -59,7 +61,7 @@ export default function SearchScreen() {
           <button
             type="button"
             className="primary-button continue-button"
-            disabled={restaurantList.length === 0}
+            disabled={items.length === 0}
             onClick={() => navigate("/my-list")}
           >
             Continue

@@ -1,13 +1,14 @@
-export interface User {
+export interface Profile {
+  id: string;
   fullName: string;
-  email: string;
-  phone: string;
+  phone: string | null;
 }
 
 export interface RestaurantListItem {
   id: string;
+  ownerId: string;
+  placeId: string;
   name: string;
-  address?: string;
-  placeId?: string;
+  address: string | null;
   checked: boolean;
 }

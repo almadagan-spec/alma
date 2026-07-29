@@ -1,12 +1,12 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAppContext } from "../AppContext";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../AuthContext";
 import "./SignupScreen.css";
 
 export default function SignupScreen() {
   const navigate = useNavigate();
-  const { setUser } = useAppContext();
+  const { signUp } = useAuth();
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -14,6 +14,9 @@ export default function SignupScreen() {
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
   const [touchedRepeat, setTouchedRepeat] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [confirmationEmail, setConfirmationEmail] = useState<string | null>(null);
 
   const passwordsMismatch =
     touchedRepeat && password.length > 0 && repeatPassword.length > 0 && password !== repeatPassword;
@@ -27,14 +30,51 @@ export default function SignupScreen() {
 
   const passwordsMatch = password !== "" && password === repeatPassword;
 
-  const canSubmit = isFormComplete && passwordsMatch;
+  const canSubmit = isFormComplete && passwordsMatch && !isSubmitting;
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!canSubmit) return;
-    setUser({ fullName: fullName.trim(), email: email.trim(), phone: phone.trim() });
+
+    setIsSubmitting(true);
+    setFormError(null);
+
+    const { error, needsConfirmation } = await signUp({
+      fullName: fullName.trim(),
+      email: email.trim(),
+      phone: phone.trim(),
+      password,
+    });
+
+    setIsSubmitting(false);
+
+    if (error) {
+      setFormError(error);
+      return;
+    }
+    if (needsConfirmation) {
+      setConfirmationEmail(email.trim());
+      return;
+    }
     navigate("/welcome");
   };
+
+  if (confirmationEmail) {
+    return (
+      <div className="screen signup-screen">
+        <div className="signup-card">
+          <h1>Check your email</h1>
+          <p className="subtitle">
+            We sent a confirmation link to {confirmationEmail}. Click it, then
+            come back and log in.
+          </p>
+          <Link to="/login" className="primary-button confirm-link">
+            Go to log in
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="screen signup-screen">
@@ -107,11 +147,16 @@ export default function SignupScreen() {
           {passwordsMismatch && (
             <p className="error-text">Passwords do not match.</p>
           )}
+          {formError && <p className="error-text">{formError}</p>}
 
           <button type="submit" className="primary-button" disabled={!canSubmit}>
-            Save and continue
+            {isSubmitting ? "Creating account…" : "Save and continue"}
           </button>
         </form>
+
+        <p className="switch-auth">
+          Already have an account? <Link to="/login">Log in</Link>
+        </p>
       </div>
     </div>
   );

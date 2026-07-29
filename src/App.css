@@ -78,3 +78,61 @@
   font-size: 13px;
   margin: -8px 0 16px;
 }
+
+.success-text {
+  color: #1a7f37;
+  font-size: 13px;
+  margin: -8px 0 16px;
+}
+
+.hint-text {
+  color: var(--color-muted);
+  font-size: 13px;
+}
+
+.switch-auth {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--color-muted);
+}
+
+.switch-auth a {
+  color: var(--color-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.switch-auth a:hover {
+  text-decoration: underline;
+}
+
+a.primary-button {
+  text-decoration: none;
+}
+
+.setup-notice {
+  max-width: 460px;
+  text-align: center;
+}
+
+.setup-notice h1 {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.setup-notice p {
+  color: var(--color-muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.setup-notice code {
+  font-family: ui-monospace, "SF Mono", Consolas, monospace;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 13px;
+}

@@ -1,0 +1,167 @@
+.restaurant-list-panel {
+  width: 100%;
+}
+
+.list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.restaurant-list-panel h1 {
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.add-button {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease, transform 0.05s ease;
+}
+
+.add-button:hover {
+  background: var(--color-primary-hover);
+}
+
+.add-button:active {
+  transform: scale(0.95);
+}
+
+.share-button,
+.shared-with-me-button {
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 0 14px;
+  height: 36px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.share-button:hover,
+.shared-with-me-button:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.restaurant-list-panel ul {
+  list-style: none;
+  margin: 0 0 24px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.restaurant-list-panel li {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.restaurant-list-panel .main-text {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.restaurant-list-panel .secondary-text {
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+.restaurant-list-panel .hours-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.restaurant-list-panel .status-badge {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.restaurant-list-panel .status-badge.open {
+  color: #1a7f37;
+  background: #e6f6ea;
+}
+
+.restaurant-list-panel .status-badge.closed {
+  color: var(--color-error);
+  background: var(--color-error-bg);
+}
+
+.restaurant-list-panel .hours-text {
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+.reservation-link {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 5px 10px;
+  border-radius: 999px;
+}
+
+.reservation-link.tabit {
+  color: #a3390b;
+  background: #fbe4d8;
+}
+
+.reservation-link.ontopo {
+  color: #1a5d99;
+  background: #dcebf8;
+}
+
+.reservation-link.phone {
+  color: var(--color-primary);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+}
+
+.reservation-link:hover {
+  filter: brightness(0.95);
+}
+
+.restaurant-list-panel .empty-list-text {
+  color: var(--color-muted);
+  font-size: 14px;
+  margin-bottom: 24px;
+}

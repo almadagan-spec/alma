@@ -1,15 +1,15 @@
 import { useNavigate } from "react-router-dom";
-import { useAppContext } from "../AppContext";
+import { useAuth } from "../AuthContext";
 import "./WelcomeScreen.css";
 
 export default function WelcomeScreen() {
   const navigate = useNavigate();
-  const { user } = useAppContext();
+  const { profile } = useAuth();
 
   return (
     <div className="screen welcome-screen">
       <div className="welcome-content">
-        {user && <p className="greeting">Welcome, {user.fullName.split(" ")[0]}!</p>}
+        {profile && <p className="greeting">Welcome, {profile.fullName.split(" ")[0]}!</p>}
         <button className="primary-button" onClick={() => navigate("/search")}>
           Create your restaurant list
         </button>
