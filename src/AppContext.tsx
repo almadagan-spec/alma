@@ -13,6 +13,7 @@ interface AppContextValue {
   setUser: (user: User) => void;
   restaurantList: RestaurantListItem[];
   addRestaurant: (item: RestaurantListItem) => void;
+  toggleRestaurant: (id: string) => void;
 }
 
 const AppContext = createContext<AppContextValue | undefined>(undefined);
@@ -37,8 +38,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  const toggleRestaurant = (id: string) => {
+    setRestaurantList((prev) => {
+      const next = prev.map((item) =>
+        item.id === id ? { ...item, checked: !item.checked } : item,
+      );
+      saveRestaurantList(next);
+      return next;
+    });
+  };
+
   const value = useMemo(
-    () => ({ user, setUser, restaurantList, addRestaurant }),
+    () => ({ user, setUser, restaurantList, addRestaurant, toggleRestaurant }),
     [user, restaurantList],
   );
 

@@ -9,4 +9,5 @@ export interface RestaurantListItem {
   name: string;
   address?: string;
   placeId?: string;
+  checked: boolean;
 }

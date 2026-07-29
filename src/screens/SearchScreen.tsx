@@ -10,7 +10,7 @@ import { getMockPredictions } from "../lib/mockRestaurants";
 import "./SearchScreen.css";
 
 export default function SearchScreen() {
-  const { restaurantList, addRestaurant } = useAppContext();
+  const { restaurantList, addRestaurant, toggleRestaurant } = useAppContext();
   const [query, setQuery] = useState("");
   const [predictions, setPredictions] = useState<PlacePrediction[]>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -44,6 +44,7 @@ export default function SearchScreen() {
       name: prediction.mainText,
       address: prediction.secondaryText,
       placeId: prediction.placeId,
+      checked: false,
     });
     setQuery("");
     setPredictions([]);
@@ -102,10 +103,19 @@ export default function SearchScreen() {
             <ul>
               {restaurantList.map((item) => (
                 <li key={item.id}>
-                  <span className="main-text">{item.name}</span>
-                  {item.address && (
-                    <span className="secondary-text">{item.address}</span>
-                  )}
+                  <label className="list-item">
+                    <input
+                      type="checkbox"
+                      checked={item.checked}
+                      onChange={() => toggleRestaurant(item.id)}
+                    />
+                    <span className="list-item-text">
+                      <span className="main-text">{item.name}</span>
+                      {item.address && (
+                        <span className="secondary-text">{item.address}</span>
+                      )}
+                    </span>
+                  </label>
                 </li>
               ))}
             </ul>
