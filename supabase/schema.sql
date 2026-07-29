@@ -1,7 +1,13 @@
 -- Alma database schema: real accounts, restaurant lists, and sharing.
--- Run this once in the Supabase SQL Editor for a fresh project.
+-- Safe to run more than once (drops and recreates its own objects first).
 
 create extension if not exists pgcrypto;
+
+drop trigger if exists on_auth_user_created on auth.users;
+drop function if exists public.handle_new_user();
+drop table if exists public.list_items cascade;
+drop table if exists public.list_shares cascade;
+drop table if exists public.profiles cascade;
 
 -- One row per signed-up user, holding the app-specific fields the signup
 -- form collects beyond what Supabase Auth already stores (email, password).
@@ -11,6 +17,31 @@ create table public.profiles (
   phone text,
   created_at timestamptz not null default now()
 );
+
+-- Restaurant list shares: who a user's list has been shared with, by email.
+create table public.list_shares (
+  id uuid primary key default gen_random_uuid(),
+  owner_id uuid not null references auth.users (id) on delete cascade,
+  shared_with_email text not null,
+  created_at timestamptz not null default now(),
+  unique (owner_id, shared_with_email)
+);
+
+-- Restaurant list items. owner_id identifies whose list a row belongs to,
+-- regardless of who actually inserted/edited it (the owner or someone the
+-- list was shared with).
+create table public.list_items (
+  id uuid primary key default gen_random_uuid(),
+  owner_id uuid not null references auth.users (id) on delete cascade,
+  place_id text not null,
+  name text not null,
+  address text,
+  checked boolean not null default true,
+  created_at timestamptz not null default now(),
+  unique (owner_id, place_id)
+);
+
+-- Now that every table exists, enable RLS and add the cross-table policies.
 
 alter table public.profiles enable row level security;
 
@@ -33,34 +64,6 @@ create policy "Users can update their own profile"
   on public.profiles for update
   using (id = auth.uid());
 
--- Auto-create a profile row right after Supabase Auth creates the user,
--- pulling full_name/phone out of the signup call's metadata.
-create function public.handle_new_user()
-returns trigger as $$
-begin
-  insert into public.profiles (id, full_name, phone)
-  values (
-    new.id,
-    coalesce(new.raw_user_meta_data ->> 'full_name', ''),
-    new.raw_user_meta_data ->> 'phone'
-  );
-  return new;
-end;
-$$ language plpgsql security definer set search_path = public;
-
-create trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute procedure public.handle_new_user();
-
--- Restaurant list shares: who a user's list has been shared with, by email.
-create table public.list_shares (
-  id uuid primary key default gen_random_uuid(),
-  owner_id uuid not null references auth.users (id) on delete cascade,
-  shared_with_email text not null,
-  created_at timestamptz not null default now(),
-  unique (owner_id, shared_with_email)
-);
-
 alter table public.list_shares enable row level security;
 
 create policy "Owners see who they've shared with; recipients see shares aimed at them"
@@ -73,20 +76,6 @@ create policy "Owners see who they've shared with; recipients see shares aimed a
 create policy "Owners can share their own list"
   on public.list_shares for insert
   with check (owner_id = auth.uid());
-
--- Restaurant list items. owner_id identifies whose list a row belongs to,
--- regardless of who actually inserted/edited it (the owner or someone the
--- list was shared with).
-create table public.list_items (
-  id uuid primary key default gen_random_uuid(),
-  owner_id uuid not null references auth.users (id) on delete cascade,
-  place_id text not null,
-  name text not null,
-  address text,
-  checked boolean not null default true,
-  created_at timestamptz not null default now(),
-  unique (owner_id, place_id)
-);
 
 alter table public.list_items enable row level security;
 
@@ -122,3 +111,22 @@ create policy "Owners and people the list is shared with can update items"
         and lower(list_shares.shared_with_email) = lower(auth.jwt() ->> 'email')
     )
   );
+
+-- Auto-create a profile row right after Supabase Auth creates the user,
+-- pulling full_name/phone out of the signup call's metadata.
+create function public.handle_new_user()
+returns trigger as $$
+begin
+  insert into public.profiles (id, full_name, phone)
+  values (
+    new.id,
+    coalesce(new.raw_user_meta_data ->> 'full_name', ''),
+    new.raw_user_meta_data ->> 'phone'
+  );
+  return new;
+end;
+$$ language plpgsql security definer set search_path = public;
+
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute procedure public.handle_new_user();
