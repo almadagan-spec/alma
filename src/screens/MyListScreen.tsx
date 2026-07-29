@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useAppContext } from "../AppContext";
 import BackButton from "../components/BackButton";
 import Modal from "../components/Modal";
@@ -10,6 +9,7 @@ import {
   type PlaceDetails,
 } from "../lib/googlePlaces";
 import { getMockDetails } from "../lib/mockRestaurants";
+import { getReservationLink } from "../lib/reservationPlatform";
 import "./MyListScreen.css";
 
 type DetailsState =
@@ -23,7 +23,6 @@ function todayHoursLine(weekdayText: string[]): string | null {
 }
 
 export default function MyListScreen() {
-  const navigate = useNavigate();
   const { restaurantList, addRestaurant } = useAppContext();
   const selected = restaurantList.filter((item) => item.checked);
 
@@ -64,23 +63,14 @@ export default function MyListScreen() {
 
         <div className="list-header">
           <h1>My restaurants</h1>
-          <div className="header-actions">
-            <button
-              type="button"
-              className="add-button"
-              onClick={() => setIsAddOpen(true)}
-              aria-label="Add a restaurant"
-            >
-              +
-            </button>
-            <button
-              type="button"
-              className="reserve-button"
-              onClick={() => navigate("/reserve")}
-            >
-              Reserve
-            </button>
-          </div>
+          <button
+            type="button"
+            className="add-button"
+            onClick={() => setIsAddOpen(true)}
+            aria-label="Add a restaurant"
+          >
+            +
+          </button>
         </div>
 
         {selected.length > 0 ? (
@@ -120,6 +110,24 @@ export default function MyListScreen() {
                           </span>
                         )}
                       </span>
+                      {(() => {
+                        const link = getReservationLink(
+                          state.details.website,
+                          state.details.phone,
+                        );
+                        return link.href ? (
+                          <a
+                            className={`reservation-link ${link.type}`}
+                            href={link.href}
+                            target={link.type === "phone" ? undefined : "_blank"}
+                            rel={link.type === "phone" ? undefined : "noreferrer"}
+                          >
+                            {link.label}
+                          </a>
+                        ) : (
+                          <span className="secondary-text">{link.label}</span>
+                        );
+                      })()}
                     </>
                   )}
                 </li>
