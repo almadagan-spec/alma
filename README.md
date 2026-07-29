@@ -11,7 +11,12 @@ A one-stop app for building your own restaurant reservation list.
 2. **Welcome** (`/welcome`) — a single centered "Create your restaurant
    list" button.
 3. **Search** (`/search`) — a search bar titled "Type restaurant name"
-   with live autocomplete. Selecting a suggestion adds it to your list.
+   with live autocomplete. Selecting a suggestion adds it to your list,
+   checked.
+4. **My restaurants** (`/my-list`) — the full list with live address and
+   hours from Google, a `+` popup to add more, and a reservation link per
+   restaurant: "Reserve on Tabit" / "Reserve on Ontopo" when detected, a
+   tap-to-call number otherwise.
 
 State (user + list) is persisted to `localStorage`, so reloading keeps
 you on the right screen.
@@ -35,6 +40,30 @@ To enable real search results:
    with the **Places API** enabled.
 2. Copy `.env.example` to `.env` and set `VITE_GOOGLE_MAPS_API_KEY`.
 3. Restart `npm run dev`.
+
+## Deployment (GitHub Pages)
+
+`.github/workflows/deploy.yml` builds and deploys the app to GitHub
+Pages on every push to `claude/restaurant-reservation-app-o6g001`.
+
+**One-time setup** (can't be done from a workflow file — do this once in
+the repo's web UI): go to **Settings → Pages** and set **Source** to
+**GitHub Actions**. After that, every push to the branch above
+redeploys automatically, and the app is live at:
+
+```
+https://almadagan-spec.github.io/alma/
+```
+
+To have the deployed site use real Google Places data instead of demo
+data, add a repository secret named `VITE_GOOGLE_MAPS_API_KEY`
+(**Settings → Secrets and variables → Actions**) with your API key, then
+re-run the workflow.
+
+The app uses `HashRouter` (URLs look like `.../#/search`) specifically
+so it works on static hosts like GitHub Pages without any server-side
+rewrite rules — a hard refresh or a shared link to any screen works
+correctly.
 
 ## Scripts
 
