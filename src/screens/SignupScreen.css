@@ -1,0 +1,30 @@
+.signup-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--color-surface);
+  border-radius: 16px;
+  box-shadow: var(--shadow-card);
+  padding: 36px;
+}
+
+.signup-card h1 {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.signup-card .subtitle {
+  display: block;
+  color: var(--color-muted);
+  font-size: 14px;
+  margin-top: 8px;
+  margin-bottom: 24px;
+}
+
+.signup-card form {
+  margin-top: 8px;
+}
+
+.signup-card .primary-button {
+  width: 100%;
+  margin-top: 8px;
+}
