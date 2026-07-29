@@ -1,0 +1,50 @@
+.my-list-screen {
+  align-items: flex-start;
+  padding-top: 80px;
+}
+
+.my-list-content {
+  width: 100%;
+  max-width: 520px;
+}
+
+.my-list-content h1 {
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.my-list-content ul {
+  list-style: none;
+  margin: 0 0 24px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.my-list-content li {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.my-list-content .main-text {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.my-list-content .secondary-text {
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+.my-list-content .empty-list-text {
+  color: var(--color-muted);
+  font-size: 14px;
+  margin-bottom: 24px;
+}

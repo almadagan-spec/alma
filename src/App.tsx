@@ -3,6 +3,7 @@ import { useAppContext } from "./AppContext";
 import SignupScreen from "./screens/SignupScreen";
 import WelcomeScreen from "./screens/WelcomeScreen";
 import SearchScreen from "./screens/SearchScreen";
+import MyListScreen from "./screens/MyListScreen";
 import "./App.css";
 
 function RootRedirect() {
@@ -34,6 +35,14 @@ function App() {
         element={
           <RequireUser>
             <SearchScreen />
+          </RequireUser>
+        }
+      />
+      <Route
+        path="/my-list"
+        element={
+          <RequireUser>
+            <MyListScreen />
           </RequireUser>
         }
       />
