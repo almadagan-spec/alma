@@ -4,6 +4,13 @@ export interface PlacePrediction {
   secondaryText: string;
 }
 
+export interface PlaceDetails {
+  name: string;
+  address: string;
+  openNow: boolean | null;
+  weekdayText: string[];
+}
+
 const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
 
 let scriptLoadingPromise: Promise<void> | null = null;
@@ -28,6 +35,16 @@ function loadGoogleMapsScript(): Promise<void> {
 
 let autocompleteService: google.maps.places.AutocompleteService | null = null;
 let sessionToken: google.maps.places.AutocompleteSessionToken | null = null;
+let placesService: google.maps.places.PlacesService | null = null;
+
+function getPlacesService(): google.maps.places.PlacesService {
+  if (!placesService) {
+    placesService = new window.google.maps.places.PlacesService(
+      document.createElement("div"),
+    );
+  }
+  return placesService;
+}
 
 export const isGooglePlacesConfigured = Boolean(API_KEY);
 
@@ -71,6 +88,36 @@ export async function getRestaurantPredictions(
             secondaryText: p.structured_formatting.secondary_text ?? "",
           })),
         );
+      },
+    );
+  });
+}
+
+export async function getPlaceDetails(
+  placeId: string,
+): Promise<PlaceDetails | null> {
+  if (!isGooglePlacesConfigured) return null;
+
+  await loadGoogleMapsScript();
+  const service = getPlacesService();
+
+  return new Promise((resolve) => {
+    service.getDetails(
+      {
+        placeId,
+        fields: ["name", "formatted_address", "opening_hours"],
+      },
+      (place, status) => {
+        if (status !== window.google.maps.places.PlacesServiceStatus.OK || !place) {
+          resolve(null);
+          return;
+        }
+        resolve({
+          name: place.name ?? "",
+          address: place.formatted_address ?? "",
+          openNow: place.opening_hours?.isOpen?.() ?? null,
+          weekdayText: place.opening_hours?.weekday_text ?? [],
+        });
       },
     );
   });

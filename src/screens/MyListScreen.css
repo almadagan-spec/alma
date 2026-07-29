@@ -43,6 +43,36 @@
   color: var(--color-muted);
 }
 
+.my-list-content .hours-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.my-list-content .status-badge {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.my-list-content .status-badge.open {
+  color: #1a7f37;
+  background: #e6f6ea;
+}
+
+.my-list-content .status-badge.closed {
+  color: var(--color-error);
+  background: var(--color-error-bg);
+}
+
+.my-list-content .hours-text {
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
 .my-list-content .empty-list-text {
   color: var(--color-muted);
   font-size: 14px;
