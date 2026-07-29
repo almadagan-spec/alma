@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useAppContext } from "../AppContext";
+import RestaurantAutocomplete from "../components/RestaurantAutocomplete";
 import {
   getPlaceDetails,
   isGooglePlacesConfigured,
@@ -20,11 +20,11 @@ function todayHoursLine(weekdayText: string[]): string | null {
 }
 
 export default function MyListScreen() {
-  const navigate = useNavigate();
-  const { restaurantList } = useAppContext();
+  const { restaurantList, addRestaurant } = useAppContext();
   const selected = restaurantList.filter((item) => item.checked);
 
   const [detailsById, setDetailsById] = useState<Record<string, DetailsState>>({});
+  const [isAddOpen, setIsAddOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -53,10 +53,29 @@ export default function MyListScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [restaurantList]);
 
+  useEffect(() => {
+    if (!isAddOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsAddOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isAddOpen]);
+
   return (
     <div className="screen my-list-screen">
       <div className="my-list-content">
-        <h1>My restaurants</h1>
+        <div className="list-header">
+          <h1>My restaurants</h1>
+          <button
+            type="button"
+            className="add-button"
+            onClick={() => setIsAddOpen(true)}
+            aria-label="Add a restaurant"
+          >
+            +
+          </button>
+        </div>
 
         {selected.length > 0 ? (
           <ul>
@@ -104,15 +123,28 @@ export default function MyListScreen() {
         ) : (
           <p className="empty-list-text">No restaurants checked yet.</p>
         )}
-
-        <button
-          type="button"
-          className="primary-button"
-          onClick={() => navigate("/search")}
-        >
-          Back to search
-        </button>
       </div>
+
+      {isAddOpen && (
+        <div className="modal-backdrop" onClick={() => setIsAddOpen(false)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+            <h2>Add a restaurant</h2>
+            <RestaurantAutocomplete
+              autoFocus
+              onSelect={(prediction) => {
+                addRestaurant({
+                  id: prediction.placeId,
+                  name: prediction.mainText,
+                  address: prediction.secondaryText,
+                  placeId: prediction.placeId,
+                  checked: true,
+                });
+                setIsAddOpen(false);
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
