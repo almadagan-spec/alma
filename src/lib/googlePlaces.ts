@@ -1,3 +1,5 @@
+import type { OpeningPeriod } from "./openingHours";
+
 export interface PlacePrediction {
   placeId: string;
   mainText: string;
@@ -9,6 +11,15 @@ export interface PlaceDetails {
   address: string;
   openNow: boolean | null;
   weekdayText: string[];
+}
+
+export interface ReservationDetails {
+  name: string;
+  address: string;
+  phone: string | null;
+  website: string | null;
+  mapsUrl: string | null;
+  periods: OpeningPeriod[] | null;
 }
 
 const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
@@ -117,6 +128,51 @@ export async function getPlaceDetails(
           address: place.formatted_address ?? "",
           openNow: place.opening_hours?.isOpen?.() ?? null,
           weekdayText: place.opening_hours?.weekday_text ?? [],
+        });
+      },
+    );
+  });
+}
+
+export async function getReservationDetails(
+  placeId: string,
+): Promise<ReservationDetails | null> {
+  if (!isGooglePlacesConfigured) return null;
+
+  await loadGoogleMapsScript();
+  const service = getPlacesService();
+
+  return new Promise((resolve) => {
+    service.getDetails(
+      {
+        placeId,
+        fields: [
+          "name",
+          "formatted_address",
+          "formatted_phone_number",
+          "website",
+          "url",
+          "opening_hours",
+        ],
+      },
+      (place, status) => {
+        if (status !== window.google.maps.places.PlacesServiceStatus.OK || !place) {
+          resolve(null);
+          return;
+        }
+        resolve({
+          name: place.name ?? "",
+          address: place.formatted_address ?? "",
+          phone: place.formatted_phone_number ?? null,
+          website: place.website ?? null,
+          mapsUrl: place.url ?? null,
+          periods:
+            place.opening_hours?.periods?.map((p) => ({
+              open: { day: p.open.day, hours: p.open.hours, minutes: p.open.minutes },
+              close: p.close
+                ? { day: p.close.day, hours: p.close.hours, minutes: p.close.minutes }
+                : undefined,
+            })) ?? null,
         });
       },
     );

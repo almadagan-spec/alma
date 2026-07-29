@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAppContext } from "../AppContext";
 import RestaurantAutocomplete from "../components/RestaurantAutocomplete";
 import {
@@ -20,6 +21,7 @@ function todayHoursLine(weekdayText: string[]): string | null {
 }
 
 export default function MyListScreen() {
+  const navigate = useNavigate();
   const { restaurantList, addRestaurant } = useAppContext();
   const selected = restaurantList.filter((item) => item.checked);
 
@@ -67,14 +69,23 @@ export default function MyListScreen() {
       <div className="my-list-content">
         <div className="list-header">
           <h1>My restaurants</h1>
-          <button
-            type="button"
-            className="add-button"
-            onClick={() => setIsAddOpen(true)}
-            aria-label="Add a restaurant"
-          >
-            +
-          </button>
+          <div className="header-actions">
+            <button
+              type="button"
+              className="add-button"
+              onClick={() => setIsAddOpen(true)}
+              aria-label="Add a restaurant"
+            >
+              +
+            </button>
+            <button
+              type="button"
+              className="reserve-button"
+              onClick={() => navigate("/reserve")}
+            >
+              Reserve
+            </button>
+          </div>
         </div>
 
         {selected.length > 0 ? (

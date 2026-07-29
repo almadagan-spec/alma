@@ -4,6 +4,7 @@ import SignupScreen from "./screens/SignupScreen";
 import WelcomeScreen from "./screens/WelcomeScreen";
 import SearchScreen from "./screens/SearchScreen";
 import MyListScreen from "./screens/MyListScreen";
+import ReserveScreen from "./screens/ReserveScreen";
 import "./App.css";
 
 function RootRedirect() {
@@ -43,6 +44,14 @@ function App() {
         element={
           <RequireUser>
             <MyListScreen />
+          </RequireUser>
+        }
+      />
+      <Route
+        path="/reserve"
+        element={
+          <RequireUser>
+            <ReserveScreen />
           </RequireUser>
         }
       />

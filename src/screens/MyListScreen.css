@@ -21,6 +21,34 @@
   font-weight: 700;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.reserve-button {
+  border: none;
+  border-radius: 999px;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 0 16px;
+  height: 36px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.05s ease;
+}
+
+.reserve-button:hover {
+  background: var(--color-primary-hover);
+}
+
+.reserve-button:active {
+  transform: scale(0.97);
+}
+
 .add-button {
   width: 36px;
   height: 36px;
