@@ -88,9 +88,36 @@
   gap: 2px;
 }
 
+.item-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
 .restaurant-list-panel .main-text {
   font-weight: 600;
   font-size: 15px;
+}
+
+.remove-button {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: var(--color-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.remove-button:hover {
+  background: var(--color-error-bg);
+  color: var(--color-error);
 }
 
 .restaurant-list-panel .secondary-text {

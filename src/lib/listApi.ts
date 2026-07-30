@@ -53,6 +53,11 @@ export async function setItemChecked(id: string, checked: boolean): Promise<void
   if (error) throw error;
 }
 
+export async function deleteListItem(id: string): Promise<void> {
+  const { error } = await supabase!.from("list_items").delete().eq("id", id);
+  if (error) throw error;
+}
+
 export interface ShareResult {
   ok: boolean;
   message: string;

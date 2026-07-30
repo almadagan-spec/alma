@@ -13,7 +13,7 @@ import "./App.css";
 function RootRedirect() {
   const { loading, session } = useAuth();
   if (loading) return null;
-  return <Navigate to={session ? "/welcome" : "/signup"} replace />;
+  return <Navigate to={session ? "/my-list" : "/signup"} replace />;
 }
 
 function RequireAuth({ children }: { children: React.ReactElement }) {

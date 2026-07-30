@@ -30,7 +30,7 @@ export default function LoginScreen() {
       setFormError(error);
       return;
     }
-    navigate("/welcome");
+    navigate("/my-list");
   };
 
   return (

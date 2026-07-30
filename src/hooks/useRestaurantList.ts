@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import type { RestaurantListItem } from "../types";
-import { addListItem, fetchList, setItemChecked } from "../lib/listApi";
+import { addListItem, deleteListItem, fetchList, setItemChecked } from "../lib/listApi";
 
 export function useRestaurantList(ownerId: string | null) {
   const [items, setItems] = useState<RestaurantListItem[]>([]);
@@ -44,5 +44,10 @@ export function useRestaurantList(ownerId: string | null) {
     await reload();
   };
 
-  return { items, loading, error, addRestaurant, toggleRestaurant, reload };
+  const removeRestaurant = async (item: RestaurantListItem) => {
+    await deleteListItem(item.id);
+    await reload();
+  };
+
+  return { items, loading, error, addRestaurant, toggleRestaurant, removeRestaurant, reload };
 }

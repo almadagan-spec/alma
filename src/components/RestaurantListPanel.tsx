@@ -35,7 +35,7 @@ export default function RestaurantListPanel({
   canShare,
 }: RestaurantListPanelProps) {
   const navigate = useNavigate();
-  const { items, loading, error, addRestaurant } = useRestaurantList(ownerId);
+  const { items, loading, error, addRestaurant, removeRestaurant } = useRestaurantList(ownerId);
   const selected = items.filter((item) => item.checked);
 
   const [detailsById, setDetailsById] = useState<Record<string, DetailsState>>({});
@@ -112,9 +112,34 @@ export default function RestaurantListPanel({
               const state = detailsById[item.id];
               return (
                 <li key={item.id}>
-                  <span className="main-text">
-                    {state?.status === "loaded" ? state.details.name : item.name}
-                  </span>
+                  <div className="item-header">
+                    <span className="main-text">
+                      {state?.status === "loaded" ? state.details.name : item.name}
+                    </span>
+                    <button
+                      type="button"
+                      className="remove-button"
+                      onClick={() => removeRestaurant(item)}
+                      aria-label={`Remove ${item.name} from the list`}
+                    >
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <polyline points="3 6 5 6 21 6" />
+                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                        <path d="M10 11v6" />
+                        <path d="M14 11v6" />
+                        <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                      </svg>
+                    </button>
+                  </div>
 
                   {state?.status === "loading" && (
                     <span className="secondary-text">Fetching latest info…</span>

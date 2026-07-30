@@ -1,3 +1,29 @@
+.welcome-screen {
+  position: relative;
+}
+
+.logout-button {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--color-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.logout-button:hover {
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
 .welcome-content {
   display: flex;
   flex-direction: column;
