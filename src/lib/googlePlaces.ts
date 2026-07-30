@@ -37,16 +37,16 @@ function loadGoogleMapsScript(): Promise<void> {
 
 export const isGooglePlacesConfigured = Boolean(API_KEY);
 
-let placesLibraryPromise: Promise<google.maps.PlacesLibrary> | null = null;
-
-async function getPlacesLibrary(): Promise<google.maps.PlacesLibrary> {
+/**
+ * The script tag below loads the classic way (a direct <script src>, with
+ * libraries=places requested up front), not via Google's newer bootstrap
+ * loader snippet. That means google.maps.importLibrary is never defined —
+ * the places classes are already attached directly on google.maps.places
+ * once the script has loaded, so we just return that namespace as-is.
+ */
+async function getPlacesLibrary(): Promise<typeof google.maps.places> {
   await loadGoogleMapsScript();
-  if (!placesLibraryPromise) {
-    placesLibraryPromise = google.maps.importLibrary(
-      "places",
-    ) as Promise<google.maps.PlacesLibrary>;
-  }
-  return placesLibraryPromise;
+  return google.maps.places;
 }
 
 let sessionToken: google.maps.places.AutocompleteSessionToken | null = null;
