@@ -112,6 +112,17 @@ create policy "Owners and people the list is shared with can update items"
     )
   );
 
+create policy "Owners and people the list is shared with can delete items"
+  on public.list_items for delete
+  using (
+    owner_id = auth.uid()
+    or exists (
+      select 1 from public.list_shares
+      where list_shares.owner_id = list_items.owner_id
+        and lower(list_shares.shared_with_email) = lower(auth.jwt() ->> 'email')
+    )
+  );
+
 -- Auto-create a profile row right after Supabase Auth creates the user,
 -- pulling full_name/phone out of the signup call's metadata.
 create function public.handle_new_user()
