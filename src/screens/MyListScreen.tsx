@@ -1,4 +1,5 @@
 import { useAuth } from "../AuthContext";
+import BackButton from "../components/BackButton";
 import RestaurantListPanel from "../components/RestaurantListPanel";
 import "./MyListScreen.css";
 
@@ -10,6 +11,7 @@ export default function MyListScreen() {
   return (
     <div className="screen my-list-screen">
       <div className="my-list-content">
+        <BackButton to="/welcome" />
         <RestaurantListPanel ownerId={authUser.id} title="My restaurants" canShare />
       </div>
     </div>
