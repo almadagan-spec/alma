@@ -13,7 +13,22 @@ export interface PlaceDetails {
   website: string | null;
 }
 
-const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
+/**
+ * Google API keys only ever contain letters, digits, "-" and "_". Strip
+ * anything else (stray whitespace, smart quotes, zero-width characters
+ * that can sneak in via copy/paste) so a slightly-dirty secret can't
+ * corrupt the X-Goog-Api-Key header the Places library sends on every
+ * request, which otherwise throws "non ISO-8859-1 code point".
+ */
+const RAW_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
+const API_KEY = RAW_API_KEY?.replace(/[^A-Za-z0-9_-]/g, "");
+
+if (RAW_API_KEY && API_KEY !== RAW_API_KEY) {
+  console.warn(
+    "[Alma] VITE_GOOGLE_MAPS_API_KEY contained unexpected characters that were stripped. " +
+      "If Places search still fails, re-copy the key from Google Cloud Console.",
+  );
+}
 
 let scriptLoadingPromise: Promise<void> | null = null;
 
