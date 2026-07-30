@@ -31,10 +31,14 @@ if (RAW_API_KEY && !extractedKey) {
     `[Alma] VITE_GOOGLE_MAPS_API_KEY (length ${RAW_API_KEY.length}) doesn't contain a ` +
       "recognizable Google API key pattern (AIza...). Re-copy the key from Google Cloud Console.",
   );
-  // Temporary diagnostic: this key is already non-functional, so printing it
-  // in full carries no extra exposure. JSON.stringify reveals hidden
-  // characters (newlines, non-breaking spaces, etc.) as visible escapes.
-  console.warn("[Alma] Raw value for inspection:", JSON.stringify(RAW_API_KEY));
+  // Temporary diagnostic: Chrome DevTools redacts strings that look like API
+  // keys, so print character codes instead of the raw string — that survives
+  // the redaction and still reveals hidden characters (e.g. 160 = a
+  // non-breaking space, 10 = a newline) that plain text would hide.
+  const codes = Array.from(RAW_API_KEY)
+    .map((ch, i) => `${i}:${ch === " " ? "SPACE" : ch}(${ch.codePointAt(0)})`)
+    .join(" ");
+  console.warn("[Alma] Char-by-char inspection:", codes);
 } else if (RAW_API_KEY && extractedKey !== RAW_API_KEY) {
   console.warn(
     `[Alma] VITE_GOOGLE_MAPS_API_KEY had extra content around the real key (raw length ` +
