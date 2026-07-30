@@ -17,17 +17,47 @@ const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
 
 let scriptLoadingPromise: Promise<void> | null = null;
 
+function isPlacesNamespaceReady(): boolean {
+  return Boolean(window.google?.maps?.places?.AutocompleteSuggestion);
+}
+
+/**
+ * The script's onload event fires once the file has been fetched and
+ * executed, but with an async-loading Maps script that isn't always the
+ * same moment google.maps.places is fully populated — so poll briefly
+ * rather than assuming it's ready the instant onload fires.
+ */
+function waitForPlacesNamespace(): Promise<void> {
+  if (isPlacesNamespaceReady()) return Promise.resolve();
+
+  return new Promise((resolve, reject) => {
+    const start = Date.now();
+    const check = () => {
+      if (isPlacesNamespaceReady()) {
+        resolve();
+        return;
+      }
+      if (Date.now() - start > 10000) {
+        reject(new Error("Timed out waiting for the Google Places library to load"));
+        return;
+      }
+      setTimeout(check, 50);
+    };
+    check();
+  });
+}
+
 function loadGoogleMapsScript(): Promise<void> {
-  if (typeof window !== "undefined" && window.google?.maps) {
+  if (typeof window !== "undefined" && isPlacesNamespaceReady()) {
     return Promise.resolve();
   }
   if (scriptLoadingPromise) return scriptLoadingPromise;
 
   scriptLoadingPromise = new Promise((resolve, reject) => {
     const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${API_KEY}&libraries=places&loading=async`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${API_KEY}&libraries=places`;
     script.async = true;
-    script.onload = () => resolve();
+    script.onload = () => waitForPlacesNamespace().then(resolve).catch(reject);
     script.onerror = () => reject(new Error("Failed to load Google Maps script"));
     document.head.appendChild(script);
   });
