@@ -11,13 +11,13 @@
 
 .modal-card {
   width: 100%;
-  max-width: 380px;
+  max-width: 560px;
   background: var(--color-surface);
   border-radius: 16px;
   box-shadow: var(--shadow-card);
-  padding: 24px;
+  padding: 28px;
   max-height: calc(100vh - 48px);
-  overflow-y: auto;
+  overflow-y: visible;
 }
 
 .modal-card h2 {

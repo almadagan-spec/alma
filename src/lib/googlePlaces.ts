@@ -131,6 +131,7 @@ export async function getRestaurantPredictions(
     const { suggestions } = await AutocompleteSuggestion.fetchAutocompleteSuggestions({
       input,
       includedPrimaryTypes: ["restaurant"],
+      includedRegionCodes: ["il"],
       sessionToken,
     });
 
