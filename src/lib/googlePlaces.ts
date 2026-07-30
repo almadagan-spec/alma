@@ -91,7 +91,8 @@ export async function getRestaurantPredictions(
         mainText: readFormattableText(prediction.mainText) || readFormattableText(prediction.text),
         secondaryText: readFormattableText(prediction.secondaryText),
       }));
-  } catch {
+  } catch (error) {
+    console.error("[Alma] getRestaurantPredictions failed:", error);
     return [];
   }
 }
@@ -130,7 +131,8 @@ export async function getPlaceDetails(
       phone: result.nationalPhoneNumber ?? null,
       website: result.websiteURI ?? null,
     };
-  } catch {
+  } catch (error) {
+    console.error("[Alma] getPlaceDetails failed:", error);
     return null;
   }
 }
