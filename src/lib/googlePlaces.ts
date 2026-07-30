@@ -14,19 +14,27 @@ export interface PlaceDetails {
 }
 
 /**
- * Google API keys only ever contain letters, digits, "-" and "_". Strip
- * anything else (stray whitespace, smart quotes, zero-width characters
- * that can sneak in via copy/paste) so a slightly-dirty secret can't
- * corrupt the X-Goog-Api-Key header the Places library sends on every
- * request, which otherwise throws "non ISO-8859-1 code point".
+ * Google Maps API keys always match /^AIza[0-9A-Za-z_-]{35}$/. Rather than
+ * trust the raw env var (a mis-pasted secret can carry leftover text,
+ * duplicated content, or stray whitespace around the real key), pull the
+ * first substring that matches this exact shape out of whatever is there.
+ * This is immune to surrounding garbage in a way that merely stripping
+ * invalid characters is not.
  */
 const RAW_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
-const API_KEY = RAW_API_KEY?.replace(/[^A-Za-z0-9_-]/g, "");
+const KEY_PATTERN = /AIza[0-9A-Za-z_-]{35}/;
+const extractedKey = RAW_API_KEY?.match(KEY_PATTERN)?.[0];
+const API_KEY = extractedKey ?? RAW_API_KEY?.replace(/[^A-Za-z0-9_-]/g, "");
 
-if (RAW_API_KEY && API_KEY !== RAW_API_KEY) {
+if (RAW_API_KEY && !extractedKey) {
   console.warn(
-    "[Alma] VITE_GOOGLE_MAPS_API_KEY contained unexpected characters that were stripped. " +
-      "If Places search still fails, re-copy the key from Google Cloud Console.",
+    `[Alma] VITE_GOOGLE_MAPS_API_KEY (length ${RAW_API_KEY.length}) doesn't contain a ` +
+      "recognizable Google API key pattern (AIza...). Re-copy the key from Google Cloud Console.",
+  );
+} else if (RAW_API_KEY && extractedKey !== RAW_API_KEY) {
+  console.warn(
+    `[Alma] VITE_GOOGLE_MAPS_API_KEY had extra content around the real key (raw length ` +
+      `${RAW_API_KEY.length}, extracted length ${extractedKey!.length}). Using the extracted key.`,
   );
 }
 
