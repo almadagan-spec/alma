@@ -83,9 +83,13 @@ const rows = await supabaseFetch(
 console.log(`Checking ${rows.length} restaurant(s) with no reservation link yet.`);
 
 let updated = 0;
+const unmatched = [];
 for (const row of rows) {
   const url = byName.get(normalize(row.name));
-  if (!url) continue;
+  if (!url) {
+    unmatched.push(row.name);
+    continue;
+  }
 
   await supabaseFetch(`list_items?id=eq.${row.id}`, {
     method: "PATCH",
@@ -96,3 +100,14 @@ for (const row of rows) {
 }
 
 console.log(`Done. Updated ${updated} of ${rows.length} restaurant(s).`);
+
+// Marked so a Claude session can grep this log (via the GitHub API) and
+// research each one — this is what turns "not in the directory yet" into
+// "gets added automatically" without anyone needing to remember to ask.
+// A restaurant that's really on Ontopo but hasn't had its link saved yet
+// (its owner hasn't opened the site since adding it, so the live in-browser
+// search hasn't run) can show up here too — harmless, it'll drop off once
+// that live search saves its link on its own.
+for (const name of unmatched) {
+  console.log(`UNMATCHED: ${name}`);
+}
