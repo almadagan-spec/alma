@@ -12,12 +12,15 @@ interface RestaurantAutocompleteProps {
   onSelect: (prediction: PlacePrediction) => void;
   placeholder?: string;
   autoFocus?: boolean;
+  /** placeIds already in the user's list, so matching results show checked. */
+  existingPlaceIds?: Set<string>;
 }
 
 export default function RestaurantAutocomplete({
   onSelect,
   placeholder,
   autoFocus,
+  existingPlaceIds,
 }: RestaurantAutocompleteProps) {
   const [query, setQuery] = useState("");
   const [predictions, setPredictions] = useState<PlacePrediction[]>([]);
@@ -81,7 +84,7 @@ export default function RestaurantAutocomplete({
                 <button type="button" onClick={() => handleSelect(p)}>
                   <input
                     type="checkbox"
-                    checked={false}
+                    checked={existingPlaceIds?.has(p.placeId) ?? false}
                     readOnly
                     tabIndex={-1}
                     aria-hidden="true"

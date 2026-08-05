@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import Modal from "./Modal";
@@ -41,6 +41,10 @@ export default function RestaurantListPanel({
   const { items, loading, error, addRestaurant, removeRestaurant, setRestaurantReservationUrl } =
     useRestaurantList(ownerId);
   const selected = items.filter((item) => item.checked);
+  const existingPlaceIds = useMemo(
+    () => new Set(items.map((item) => item.placeId)),
+    [items],
+  );
 
   const [detailsById, setDetailsById] = useState<Record<string, DetailsState>>({});
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -252,6 +256,7 @@ export default function RestaurantListPanel({
           <h2>Add a restaurant</h2>
           <RestaurantAutocomplete
             autoFocus
+            existingPlaceIds={existingPlaceIds}
             onSelect={(prediction) => {
               addRestaurant({
                 placeId: prediction.placeId,

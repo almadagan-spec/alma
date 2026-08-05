@@ -54,17 +54,20 @@ function extractVenues(data: unknown): OntopoVenue[] {
 /**
  * Comparing names as text doesn't work: Google often stores a restaurant's
  * name in Hebrew while Ontopo's `locale=en` results come back transliterated
- * ("סלאס" vs "Selas") — different scripts can never text-match. Instead,
- * use what real search results look like: Ontopo pads out to a full batch
- * of MAX_UNMATCHED_RESULTS generic/popular venues when it has no genuine
- * match, but returns a short, focused list when it does. That alone breaks
- * down for a short/generic name (e.g. "Dot") — a real match still gets
- * buried in a full, generic-looking batch. For that case, fall back to
- * checking each candidate's address against the restaurant's known Google
- * address, since a name collision with a different venue essentially never
- * also shares a street.
+ * ("סלאס" vs "Selas") — different scripts can never text-match. A result
+ * count heuristic (small list = confident match) isn't reliable either: a
+ * generic name (e.g. "Eats") can return a small-looking list that's still
+ * just a coincidental near-match to a *different* venue, producing a wrong
+ * link with real-sounding confidence. Address is the strongest available
+ * signal — a name collision with a genuinely different venue essentially
+ * never also shares a street — so it's checked first, regardless of result
+ * count, and only falls back to trusting a small result count when no
+ * address data is available to confirm against at all. Kept generous
+ * enough to not break already-confirmed real matches ("סלאס" -> 4 results,
+ * "הדסון לילינבלום" -> 2), while still well under the batch size (20) a
+ * genuinely unmatched query always came back with.
  */
-const MAX_FOCUSED_RESULTS = 20;
+const MAX_TRUSTED_RESULTS_WITHOUT_ADDRESS = 10;
 
 function normalizeForMatch(value: string): string {
   return value
@@ -106,16 +109,21 @@ export async function findOntopoLink(
     const venues = extractVenues(await response.json());
     if (venues.length === 0) return null;
 
-    if (venues.length < MAX_FOCUSED_RESULTS) {
-      const first = venues[0];
-      return first?.slug ? `https://ontopo.com/en/il/page/${first.slug}` : null;
-    }
-
-    if (address) {
+    // Only trust the address signal if the response actually carries address
+    // data at all — if Ontopo's real response shape turns out not to include
+    // it, silently requiring a match against nothing would wrongly reject
+    // every result instead of falling back to the count-based check below.
+    const anyAddressData = venues.some((venue) => venue.address);
+    if (address && anyAddressData) {
       const match = venues.find(
         (venue) => venue.slug && addressesLikelyMatch(address, venue.address ?? ""),
       );
-      if (match?.slug) return `https://ontopo.com/en/il/page/${match.slug}`;
+      return match?.slug ? `https://ontopo.com/en/il/page/${match.slug}` : null;
+    }
+
+    if (venues.length <= MAX_TRUSTED_RESULTS_WITHOUT_ADDRESS) {
+      const first = venues[0];
+      return first?.slug ? `https://ontopo.com/en/il/page/${first.slug}` : null;
     }
 
     return null;

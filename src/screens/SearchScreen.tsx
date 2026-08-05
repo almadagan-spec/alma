@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import BackButton from "../components/BackButton";
@@ -11,6 +12,10 @@ export default function SearchScreen() {
   const { items, addRestaurant, toggleRestaurant } = useRestaurantList(
     authUser?.id ?? null,
   );
+  const existingPlaceIds = useMemo(
+    () => new Set(items.map((item) => item.placeId)),
+    [items],
+  );
 
   return (
     <div className="screen search-screen">
@@ -20,6 +25,7 @@ export default function SearchScreen() {
 
         <RestaurantAutocomplete
           autoFocus
+          existingPlaceIds={existingPlaceIds}
           onSelect={(prediction) =>
             addRestaurant({
               placeId: prediction.placeId,
