@@ -61,24 +61,32 @@ priority over auto-detection).
 
 Ontopo links are found automatically, with no setup needed: it queries
 Ontopo's own (unauthenticated) restaurant search, live in the browser.
-Once a link is found (automatically or by hand) it's saved, so it's not
-looked up again.
 
-### Tabit
+### The reservation directory (Tabit, and an Ontopo backstop)
 
 Tabit has no public search endpoint (unlike Ontopo), so there's no way
-for the site itself to look one up live. Instead, `data/tabit-directory.json`
-is a manually-researched list of restaurant name -> Tabit link, and
-`.github/workflows/apply-reservation-links.yml` applies it to every
-account's list on a daily schedule (or on demand via "Run workflow"),
-writing straight into the database with the Supabase **service role**
-key — bypassing row-level security, since this is a trusted server-side
-job, not part of the deployed website.
+for the site itself to look one up live. `data/reservation-directory.json`
+is a manually-researched list of restaurant name -> reservation link
+(Tabit or Ontopo), and `.github/workflows/apply-reservation-links.yml`
+applies it to every account's list on a daily schedule (or on demand via
+"Run workflow"), writing straight into the database with the Supabase
+**service role** key — bypassing row-level security, since this is a
+trusted server-side job, not part of the deployed website. It also
+covers Ontopo restaurants the live browser search happens to miss.
 
-To add a restaurant: append `{ "name": ..., "url": ... }` to
-`data/tabit-directory.json`, matching the name exactly as it's saved in
-the app (Hebrew or English, whichever Google lists it as). It's picked
-up on the next scheduled run.
+Two ways entries get added:
+- **A scheduled Claude Routine** ("Alma: research new Tabit restaurants")
+  runs daily: it reads the apply job's log for `UNMATCHED: <name>` lines
+  (restaurants with no link and no directory entry), researches each via
+  web search, adds any it can confidently identify to the directory,
+  and pushes — so a newly-added restaurant gets linked without anyone
+  needing to ask, typically within a day.
+- **By hand**: append `{ "name": ..., "url": ... }`, matching the name
+  exactly as it's saved in the app (Hebrew or English, whichever Google
+  lists it as — add both if unsure). Picked up on the next run.
+
+Once a link is set (directory, live search, or the pencil icon) it's
+saved and not looked up again.
 
 **Setup**: add a `SUPABASE_SERVICE_ROLE_KEY` repository secret (Project
 Settings -> API -> reveal the **secret key**/`service_role` key in

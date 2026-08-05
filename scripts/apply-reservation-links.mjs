@@ -1,6 +1,9 @@
-// Applies data/tabit-directory.json to every account's saved restaurant list.
-// Run by .github/workflows/apply-reservation-links.yml on a schedule, using
-// the Supabase service role key (bypasses row-level security — this is a
+// Applies data/reservation-directory.json to every account's saved restaurant
+// list. Covers Tabit (no public search exists, so this directory is the only
+// way it's ever filled in) and also backstops Ontopo for restaurants the
+// live in-browser search happens to miss. Run by
+// .github/workflows/apply-reservation-links.yml on a schedule, using the
+// Supabase service role key (bypasses row-level security — this is a
 // trusted server-side job, never exposed to the deployed website itself).
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -43,7 +46,7 @@ const dirPath = path.join(
   path.dirname(fileURLToPath(import.meta.url)),
   "..",
   "data",
-  "tabit-directory.json",
+  "reservation-directory.json",
 );
 const directory = JSON.parse(readFileSync(dirPath, "utf-8")).restaurants;
 
@@ -102,12 +105,9 @@ for (const row of rows) {
 console.log(`Done. Updated ${updated} of ${rows.length} restaurant(s).`);
 
 // Marked so a Claude session can grep this log (via the GitHub API) and
-// research each one — this is what turns "not in the directory yet" into
+// research each one — Tabit or Ontopo, whichever it turns out to be — and
+// add it to the directory. That's what turns "not covered yet" into
 // "gets added automatically" without anyone needing to remember to ask.
-// A restaurant that's really on Ontopo but hasn't had its link saved yet
-// (its owner hasn't opened the site since adding it, so the live in-browser
-// search hasn't run) can show up here too — harmless, it'll drop off once
-// that live search saves its link on its own.
 for (const name of unmatched) {
   console.log(`UNMATCHED: ${name}`);
 }

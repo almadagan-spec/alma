@@ -1,0 +1,37 @@
+{
+  "_comment": "Manually researched reservation links, applied to every account's list by scripts/apply-reservation-links.mjs. This is the backstop for both platforms: Ontopo is normally found live in the browser (no setup needed), but this directory also covers Ontopo restaurants that live search happens to miss, plus all of Tabit (which has no public search API at all, so this file is the only way it ever gets filled in). Add an entry matching the exact restaurant name as saved in the app's list; the next run of apply-reservation-links.yml fills it in everywhere that name appears, no pencil icon needed.",
+  "restaurants": [
+    {
+      "name": "בר 51",
+      "url": "https://tabitisrael.co.il/online-reservations/create-reservation?step=search&orgId=5c77adcd17187875bc13f2cf"
+    },
+    {
+      "name": "Bel Ami",
+      "url": "https://tabitisrael.co.il/site/bel-ami"
+    },
+    {
+      "name": "בל עמי",
+      "url": "https://tabitisrael.co.il/site/bel-ami"
+    },
+    {
+      "name": "OCD TLV",
+      "url": "https://ontopo.co.il/en/ocd"
+    },
+    {
+      "name": "OCD",
+      "url": "https://ontopo.co.il/en/ocd"
+    },
+    {
+      "name": "Nam",
+      "url": "https://tabitisrael.co.il/site/nam-%D7%93%D7%99%D7%96%D7%A0%D7%92%D7%95%D7%A3"
+    },
+    {
+      "name": "נאם",
+      "url": "https://tabitisrael.co.il/site/nam-%D7%93%D7%99%D7%96%D7%A0%D7%92%D7%95%D7%A3"
+    },
+    {
+      "name": "Nam דיזנגוף",
+      "url": "https://tabitisrael.co.il/site/nam-%D7%93%D7%99%D7%96%D7%A0%D7%92%D7%95%D7%A3"
+    }
+  ]
+}
