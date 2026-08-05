@@ -11,4 +11,5 @@ export interface RestaurantListItem {
   name: string;
   address: string | null;
   checked: boolean;
+  reservationUrl: string | null;
 }

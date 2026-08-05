@@ -1,5 +1,5 @@
 export type ReservationLink =
-  | { type: "tabit" | "ontopo"; label: string; href: string }
+  | { type: "tabit" | "ontopo" | "link"; label: string; href: string }
   | { type: "phone"; label: string; href: string }
   | { type: "none"; label: string; href: null };
 
@@ -21,7 +21,19 @@ function detectPlatform(website: string | null): "tabit" | "ontopo" | null {
 export function getReservationLink(
   website: string | null,
   phone: string | null,
+  manualUrl?: string | null,
 ): ReservationLink {
+  if (manualUrl) {
+    const manualPlatform = detectPlatform(manualUrl);
+    if (manualPlatform === "tabit") {
+      return { type: "tabit", label: "Reserve on Tabit", href: manualUrl };
+    }
+    if (manualPlatform === "ontopo") {
+      return { type: "ontopo", label: "Reserve on Ontopo", href: manualUrl };
+    }
+    return { type: "link", label: "Reserve", href: manualUrl };
+  }
+
   const platform = detectPlatform(website);
 
   if (platform === "tabit") {

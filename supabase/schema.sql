@@ -37,6 +37,7 @@ create table public.list_items (
   name text not null,
   address text,
   checked boolean not null default true,
+  reservation_url text,
   created_at timestamptz not null default now(),
   unique (owner_id, place_id)
 );

@@ -8,6 +8,7 @@ interface ListItemRow {
   name: string;
   address: string | null;
   checked: boolean;
+  reservation_url: string | null;
 }
 
 function mapRow(row: ListItemRow): RestaurantListItem {
@@ -18,6 +19,7 @@ function mapRow(row: ListItemRow): RestaurantListItem {
     name: row.name,
     address: row.address,
     checked: row.checked,
+    reservationUrl: row.reservation_url,
   };
 }
 
@@ -55,6 +57,14 @@ export async function setItemChecked(id: string, checked: boolean): Promise<void
 
 export async function deleteListItem(id: string): Promise<void> {
   const { error } = await supabase!.from("list_items").delete().eq("id", id);
+  if (error) throw error;
+}
+
+export async function setReservationUrl(id: string, url: string | null): Promise<void> {
+  const { error } = await supabase!
+    .from("list_items")
+    .update({ reservation_url: url })
+    .eq("id", id);
   if (error) throw error;
 }
 
