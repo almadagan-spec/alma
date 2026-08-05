@@ -68,19 +68,21 @@ Tabit has no public search endpoint (unlike Ontopo), so there's no way
 for the site itself to look one up live. `data/reservation-directory.json`
 is a manually-researched list of restaurant name -> reservation link
 (Tabit or Ontopo), and `.github/workflows/apply-reservation-links.yml`
-applies it to every account's list on a daily schedule (or on demand via
-"Run workflow"), writing straight into the database with the Supabase
+applies it to every account's list hourly (or on demand via "Run
+workflow"), writing straight into the database with the Supabase
 **service role** key — bypassing row-level security, since this is a
 trusted server-side job, not part of the deployed website. It also
 covers Ontopo restaurants the live browser search happens to miss.
 
 Two ways entries get added:
-- **A scheduled Claude Routine** ("Alma: research new Tabit restaurants")
-  runs daily: it reads the apply job's log for `UNMATCHED: <name>` lines
-  (restaurants with no link and no directory entry), researches each via
-  web search, adds any it can confidently identify to the directory,
-  and pushes — so a newly-added restaurant gets linked without anyone
-  needing to ask, typically within a day.
+- **A scheduled Claude Routine** ("Alma: research new reservation links")
+  runs hourly, a few minutes after the apply job: it reads that job's log
+  for `UNMATCHED: <name>` lines (restaurants with no link and no directory
+  entry), researches each via web search, adds any it can confidently
+  identify to the directory, pushes, and re-triggers the apply job — so a
+  newly-added restaurant gets linked without anyone needing to ask,
+  typically within about an hour (true instant lookup isn't possible
+  without a paid always-on AI service wired to a database webhook).
 - **By hand**: append `{ "name": ..., "url": ... }`, matching the name
   exactly as it's saved in the app (Hebrew or English, whichever Google
   lists it as — add both if unsure). Picked up on the next run.
