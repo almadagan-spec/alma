@@ -16,14 +16,17 @@ if (!SUPABASE_URL || !RAW_SERVICE_ROLE_KEY) {
 
 // Same lesson as the Google Maps key earlier in this project: a key copied
 // from a "reveal" UI can end up with leftover masking characters instead of
-// the real value. Extract the recognizable shape rather than trusting the
-// raw env var as-is.
-const KEY_PATTERN = /sb_secret_[A-Za-z0-9_-]{20,}/;
-const extractedKey = RAW_SERVICE_ROLE_KEY.match(KEY_PATTERN)?.[0];
+// the real value. These are opaque tokens with no published fixed format,
+// so only trim surrounding whitespace and check the one thing that IS
+// documented (the sb_secret_ prefix) — anything stricter risks rejecting a
+// genuinely valid key, which is worse than letting Supabase's own server
+// be the real judge.
+const KEY_PATTERN = /sb_secret_\S+/;
+const extractedKey = RAW_SERVICE_ROLE_KEY.trim().match(KEY_PATTERN)?.[0];
 if (!extractedKey) {
   console.error(
-    `SUPABASE_SERVICE_ROLE_KEY (length ${RAW_SERVICE_ROLE_KEY.length}) doesn't look like a ` +
-      "valid Supabase secret key (sb_secret_...). Re-copy it from Supabase's API settings.",
+    `SUPABASE_SERVICE_ROLE_KEY (length ${RAW_SERVICE_ROLE_KEY.length}) doesn't contain an ` +
+      "sb_secret_... prefix. Re-copy it from Supabase's API settings.",
   );
   process.exit(1);
 }
