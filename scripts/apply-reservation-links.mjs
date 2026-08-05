@@ -45,6 +45,7 @@ console.log(
 const dirPath = path.join(
   path.dirname(fileURLToPath(import.meta.url)),
   "..",
+  "src",
   "data",
   "reservation-directory.json",
 );

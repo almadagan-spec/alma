@@ -1,3 +1,30 @@
+import reservationDirectory from "../data/reservation-directory.json";
+
+/**
+ * Restaurants already researched (by the daily automation, or by hand) —
+ * checked first and instantly, client-side, before any network round trip.
+ * This is what makes a previously-seen restaurant (Tabit or Ontopo) get its
+ * real link the moment it's added, rather than waiting for the next hourly
+ * background pass to write it in.
+ */
+function normalizeDirectoryName(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .trim();
+}
+
+const directoryByName = new Map(
+  reservationDirectory.restaurants.map((entry) => [
+    normalizeDirectoryName(entry.name),
+    entry.url,
+  ]),
+);
+
+function findInDirectory(name: string): string | null {
+  return directoryByName.get(normalizeDirectoryName(name)) ?? null;
+}
+
 /**
  * Ontopo has no official public API, but its own web app calls this
  * unauthenticated GET endpoint to power its "find a restaurant" search box.
@@ -58,14 +85,19 @@ export async function findOntopoLink(name: string): Promise<string | null> {
 }
 
 /**
- * Tabit has no known public/unauthenticated search endpoint (unlike
- * Ontopo) — no automatic lookup is available for it yet. Restaurants on
- * Tabit still work via manual entry (the pencil icon) or auto-detection
- * from Google's listed website when it happens to point at Tabit directly.
+ * Checks the researched directory first (instant, covers Tabit and any
+ * Ontopo restaurant the live search below might miss), then falls back to
+ * live Ontopo search for anything not yet researched. Tabit has no known
+ * public/unauthenticated search endpoint (unlike Ontopo), so a genuinely
+ * new Tabit restaurant still needs the hourly background research pass (or
+ * the pencil icon) before it lands in the directory this checks.
  */
 export async function findReservationLink(
   name: string,
   _address: string | null,
 ): Promise<string | null> {
+  const known = findInDirectory(name);
+  if (known) return known;
+
   return findOntopoLink(name);
 }
