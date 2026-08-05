@@ -34,13 +34,14 @@ function normalize(value: string): string {
  * Ontopo's search is fuzzy and can return a "closest" result even for a
  * restaurant it doesn't actually have (e.g. a Tabit-only place) — so a
  * result existing isn't enough; require its name to actually match the
- * one we searched for before trusting it.
+ * one we searched for before trusting it. Exact-after-normalizing only:
+ * a loose substring check (e.g. "Bar" inside "Bar 51") let mismatches
+ * through, and a wrong reservation link is worse than none at all.
  */
 function namesLikelyMatch(query: string, candidate: string): boolean {
   const q = normalize(query);
   const c = normalize(candidate);
-  if (!q || !c) return false;
-  return q.includes(c) || c.includes(q);
+  return Boolean(q) && q === c;
 }
 
 export async function findOntopoLink(name: string): Promise<string | null> {
