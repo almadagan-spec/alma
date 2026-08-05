@@ -1,8 +1,11 @@
-name: Apply Tabit reservation links
+name: Apply reservation links
 
 on:
   schedule:
-    - cron: "0 6 * * *"
+    # Runs a few minutes before the "research new entries" Claude Routine,
+    # so that Routine reads a fresh UNMATCHED list each time instead of a
+    # stale one from up to an hour ago.
+    - cron: "50 * * * *"
   workflow_dispatch:
 
 jobs:
