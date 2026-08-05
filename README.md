@@ -60,12 +60,30 @@ enter yourself via the pencil icon on that restaurant (which always takes
 priority over auto-detection).
 
 Ontopo links are found automatically, with no setup needed: it queries
-Ontopo's own (unauthenticated) restaurant search. Tabit has no public
-search endpoint, so its restaurants need the pencil-icon link entered
-manually — unless Google's listed "website" for the restaurant already
-points straight at Tabit, in which case it's detected automatically too.
+Ontopo's own (unauthenticated) restaurant search, live in the browser.
 Once a link is found (automatically or by hand) it's saved, so it's not
 looked up again.
+
+### Tabit
+
+Tabit has no public search endpoint (unlike Ontopo), so there's no way
+for the site itself to look one up live. Instead, `data/tabit-directory.json`
+is a manually-researched list of restaurant name -> Tabit link, and
+`.github/workflows/apply-reservation-links.yml` applies it to every
+account's list on a daily schedule (or on demand via "Run workflow"),
+writing straight into the database with the Supabase **service role**
+key — bypassing row-level security, since this is a trusted server-side
+job, not part of the deployed website.
+
+To add a restaurant: append `{ "name": ..., "url": ... }` to
+`data/tabit-directory.json`, matching the name exactly as it's saved in
+the app (Hebrew or English, whichever Google lists it as). It's picked
+up on the next scheduled run.
+
+**Setup**: add a `SUPABASE_SERVICE_ROLE_KEY` repository secret (Project
+Settings -> API -> reveal the **secret key**/`service_role` key in
+Supabase — not the anon key used elsewhere, and never put this one in
+`.env` or anywhere it could reach the deployed site's code).
 
 ## Accounts and sharing (Supabase)
 
