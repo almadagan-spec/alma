@@ -10,8 +10,6 @@ const ONTOPO_ISRAEL_DISTRIBUTOR_SLUG = "15171493";
 
 interface OntopoVenue {
   slug?: string;
-  title?: string;
-  name?: string;
 }
 
 function extractVenues(data: unknown): OntopoVenue[] {
@@ -23,26 +21,19 @@ function extractVenues(data: unknown): OntopoVenue[] {
   return [];
 }
 
-function normalize(value: string): string {
-  return value
-    .toLowerCase()
-    .replace(/[^\p{L}\p{N}]+/gu, " ")
-    .trim();
-}
-
 /**
- * Ontopo's search is fuzzy and can return a "closest" result even for a
- * restaurant it doesn't actually have (e.g. a Tabit-only place) — so a
- * result existing isn't enough; require its name to actually match the
- * one we searched for before trusting it. Exact-after-normalizing only:
- * a loose substring check (e.g. "Bar" inside "Bar 51") let mismatches
- * through, and a wrong reservation link is worse than none at all.
+ * Comparing names as text doesn't work: Google often stores a restaurant's
+ * name in Hebrew while Ontopo's `locale=en` results come back transliterated
+ * ("סלאס" vs "Selas") — different scripts can never text-match. Instead,
+ * use what real search results look like: Ontopo pads out to a full batch
+ * of MAX_UNMATCHED_RESULTS generic/popular venues when it has no genuine
+ * match, but returns a short, focused list when it does. A restaurant with
+ * a real match ("סלאס" -> 4 results, "הדסון לילינבלום" -> 2 results) stays
+ * well under that count; an unmatched query (confirmed Tabit-only
+ * restaurants, and other non-Ontopo names) always came back with exactly
+ * MAX_UNMATCHED_RESULTS.
  */
-function namesLikelyMatch(query: string, candidate: string): boolean {
-  const q = normalize(query);
-  const c = normalize(candidate);
-  return Boolean(q) && q === c;
-}
+const MAX_UNMATCHED_RESULTS = 20;
 
 export async function findOntopoLink(name: string): Promise<string | null> {
   const url =
@@ -54,19 +45,12 @@ export async function findOntopoLink(name: string): Promise<string | null> {
     if (!response.ok) return null;
 
     const venues = extractVenues(await response.json());
-    // Temporary diagnostic: log what Ontopo actually returns for each name,
-    // so the matching rule can be tuned against real data instead of guesses.
-    console.log(
-      `[Alma] Ontopo search "${name}" ->`,
-      venues.map((v) => v.title ?? v.name ?? "(no title)"),
-    );
+    if (venues.length === 0 || venues.length >= MAX_UNMATCHED_RESULTS) return null;
 
-    const match = venues.find(
-      (venue) => venue.slug && namesLikelyMatch(name, venue.title ?? venue.name ?? ""),
-    );
-    if (!match?.slug) return null;
+    const first = venues[0];
+    if (!first?.slug) return null;
 
-    return `https://ontopo.com/en/il/page/${match.slug}`;
+    return `https://ontopo.com/en/il/page/${first.slug}`;
   } catch (error) {
     console.error("[Alma] findOntopoLink failed:", error);
     return null;
