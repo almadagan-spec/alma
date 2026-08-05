@@ -52,6 +52,27 @@ To enable real search results:
 For the deployed site, add the same key as a repository secret instead
 (see Deployment below).
 
+## Automatic reservation-link lookup (Google Custom Search)
+
+Each restaurant shows a "Reserve on Tabit" / "Reserve on Ontopo" link when
+one can be found; otherwise it falls back to a phone link, or a link you
+enter yourself via the pencil icon on that restaurant.
+
+To have the app search for the link automatically instead of entering it by
+hand:
+
+1. In the same Google Cloud project as your Maps key, enable the
+   **Custom Search API**, then edit that key's API restrictions to also
+   allow it (alongside Maps JavaScript API / Places API).
+2. Create a search engine at
+   [programmablesearchengine.google.com](https://programmablesearchengine.google.com/),
+   set it to search the entire web, and copy its **Search engine ID**.
+3. Set `VITE_GOOGLE_SEARCH_ENGINE_ID` in `.env` (or as a repository secret
+   for the deployed site).
+
+The free tier covers 100 searches/day. Once a link is found for a
+restaurant it's saved, so it's only searched for once.
+
 ## Accounts and sharing (Supabase)
 
 Real accounts and list sharing run on [Supabase](https://supabase.com)

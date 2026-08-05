@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import Modal from "./Modal";
@@ -12,6 +12,7 @@ import {
 } from "../lib/googlePlaces";
 import { getMockDetails } from "../lib/mockRestaurants";
 import { getReservationLink } from "../lib/reservationPlatform";
+import { findReservationLink } from "../lib/reservationSearch";
 import type { RestaurantListItem } from "../types";
 import "./RestaurantListPanel.css";
 
@@ -46,6 +47,7 @@ export default function RestaurantListPanel({
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<RestaurantListItem | null>(null);
   const [editingUrl, setEditingUrl] = useState("");
+  const searchAttempted = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     let cancelled = false;
@@ -71,6 +73,24 @@ export default function RestaurantListPanel({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items]);
+
+  useEffect(() => {
+    selected.forEach((item) => {
+      if (item.reservationUrl || searchAttempted.current.has(item.id)) return;
+
+      const state = detailsById[item.id];
+      if (state?.status !== "loaded") return;
+
+      const detected = getReservationLink(state.details.website, state.details.phone);
+      if (detected.type === "tabit" || detected.type === "ontopo") return;
+
+      searchAttempted.current.add(item.id);
+      findReservationLink(item.name, item.address).then((found) => {
+        if (found) setRestaurantReservationUrl(item, found);
+      });
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected, detailsById]);
 
   return (
     <div className="restaurant-list-panel">

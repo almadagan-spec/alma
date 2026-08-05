@@ -90,6 +90,9 @@ function loadGoogleMapsScript(): Promise<void> {
 
 export const isGooglePlacesConfigured = Boolean(API_KEY);
 
+/** Shared with reservationSearch.ts so both use the same Google Cloud API key. */
+export const googleApiKey = API_KEY;
+
 /**
  * The script tag below loads the classic way (a direct <script src>, with
  * libraries=places requested up front), not via Google's newer bootstrap
