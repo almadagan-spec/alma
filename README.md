@@ -52,26 +52,20 @@ To enable real search results:
 For the deployed site, add the same key as a repository secret instead
 (see Deployment below).
 
-## Automatic reservation-link lookup (Google Custom Search)
+## Reservation links (Tabit / Ontopo)
 
 Each restaurant shows a "Reserve on Tabit" / "Reserve on Ontopo" link when
 one can be found; otherwise it falls back to a phone link, or a link you
-enter yourself via the pencil icon on that restaurant.
+enter yourself via the pencil icon on that restaurant (which always takes
+priority over auto-detection).
 
-To have the app search for the link automatically instead of entering it by
-hand:
-
-1. In the same Google Cloud project as your Maps key, enable the
-   **Custom Search API**, then edit that key's API restrictions to also
-   allow it (alongside Maps JavaScript API / Places API).
-2. Create a search engine at
-   [programmablesearchengine.google.com](https://programmablesearchengine.google.com/),
-   set it to search the entire web, and copy its **Search engine ID**.
-3. Set `VITE_GOOGLE_SEARCH_ENGINE_ID` in `.env` (or as a repository secret
-   for the deployed site).
-
-The free tier covers 100 searches/day. Once a link is found for a
-restaurant it's saved, so it's only searched for once.
+Ontopo links are found automatically, with no setup needed: it queries
+Ontopo's own (unauthenticated) restaurant search. Tabit has no public
+search endpoint, so its restaurants need the pencil-icon link entered
+manually — unless Google's listed "website" for the restaurant already
+points straight at Tabit, in which case it's detected automatically too.
+Once a link is found (automatically or by hand) it's saved, so it's not
+looked up again.
 
 ## Accounts and sharing (Supabase)
 

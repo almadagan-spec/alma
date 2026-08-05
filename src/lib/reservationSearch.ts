@@ -1,45 +1,57 @@
-import { googleApiKey } from "./googlePlaces";
-
-const SEARCH_ENGINE_ID = import.meta.env.VITE_GOOGLE_SEARCH_ENGINE_ID as
-  | string
-  | undefined;
-
-export const isReservationSearchConfigured = Boolean(googleApiKey && SEARCH_ENGINE_ID);
-
-interface CustomSearchItem {
-  link: string;
-}
-
-interface CustomSearchResponse {
-  items?: CustomSearchItem[];
-}
-
 /**
- * Looks up a restaurant's Tabit/Ontopo booking page via Google's Custom
- * Search API, since neither platform exposes a directory to query directly.
- * Best-effort: returns null on no match, no configuration, or any error —
- * callers should fall back to phone/none, same as the manual-detection path.
+ * Ontopo has no official public API, but its own web app calls this
+ * unauthenticated GET endpoint to power its "find a restaurant" search box.
+ * Slug 15171493 is Ontopo's Israel distributor ID (constant across venues).
+ * No API key needed. Best-effort: returns null on no match, a network/CORS
+ * failure, or an unexpected response shape — callers fall back to
+ * phone/manual entry either way.
  */
-export async function findReservationLink(
-  name: string,
-  address: string | null,
-): Promise<string | null> {
-  if (!isReservationSearchConfigured) return null;
+const ONTOPO_ISRAEL_DISTRIBUTOR_SLUG = "15171493";
 
-  const query = `${name} ${address ?? ""} tabit OR ontopo reservation`.trim();
+interface OntopoVenue {
+  slug?: string;
+  title?: string;
+  name?: string;
+}
+
+function extractVenues(data: unknown): OntopoVenue[] {
+  if (Array.isArray(data)) return data;
+  if (data && typeof data === "object") {
+    const obj = data as { venues?: OntopoVenue[]; results?: OntopoVenue[] };
+    return obj.venues ?? obj.results ?? [];
+  }
+  return [];
+}
+
+export async function findOntopoLink(name: string): Promise<string | null> {
   const url =
-    `https://www.googleapis.com/customsearch/v1?key=${googleApiKey}` +
-    `&cx=${SEARCH_ENGINE_ID}&num=5&q=${encodeURIComponent(query)}`;
+    `https://ontopo.com/api/venue_search?slug=${ONTOPO_ISRAEL_DISTRIBUTOR_SLUG}` +
+    `&version=1&locale=en&terms=${encodeURIComponent(name)}`;
 
   try {
     const response = await fetch(url);
     if (!response.ok) return null;
 
-    const data = (await response.json()) as CustomSearchResponse;
-    const match = data.items?.find((item) => /tabit|ontopo/i.test(item.link));
-    return match?.link ?? null;
+    const venues = extractVenues(await response.json());
+    const first = venues[0];
+    if (!first?.slug) return null;
+
+    return `https://ontopo.com/en/il/page/${first.slug}`;
   } catch (error) {
-    console.error("[Alma] findReservationLink failed:", error);
+    console.error("[Alma] findOntopoLink failed:", error);
     return null;
   }
+}
+
+/**
+ * Tabit has no known public/unauthenticated search endpoint (unlike
+ * Ontopo) — no automatic lookup is available for it yet. Restaurants on
+ * Tabit still work via manual entry (the pencil icon) or auto-detection
+ * from Google's listed website when it happens to point at Tabit directly.
+ */
+export async function findReservationLink(
+  name: string,
+  _address: string | null,
+): Promise<string | null> {
+  return findOntopoLink(name);
 }
