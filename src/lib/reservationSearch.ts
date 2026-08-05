@@ -37,6 +37,9 @@ const ONTOPO_ISRAEL_DISTRIBUTOR_SLUG = "15171493";
 
 interface OntopoVenue {
   slug?: string;
+  title?: string;
+  name?: string;
+  address?: string;
 }
 
 function extractVenues(data: unknown): OntopoVenue[] {
@@ -54,15 +57,44 @@ function extractVenues(data: unknown): OntopoVenue[] {
  * ("סלאס" vs "Selas") — different scripts can never text-match. Instead,
  * use what real search results look like: Ontopo pads out to a full batch
  * of MAX_UNMATCHED_RESULTS generic/popular venues when it has no genuine
- * match, but returns a short, focused list when it does. A restaurant with
- * a real match ("סלאס" -> 4 results, "הדסון לילינבלום" -> 2 results) stays
- * well under that count; an unmatched query (confirmed Tabit-only
- * restaurants, and other non-Ontopo names) always came back with exactly
- * MAX_UNMATCHED_RESULTS.
+ * match, but returns a short, focused list when it does. That alone breaks
+ * down for a short/generic name (e.g. "Dot") — a real match still gets
+ * buried in a full, generic-looking batch. For that case, fall back to
+ * checking each candidate's address against the restaurant's known Google
+ * address, since a name collision with a different venue essentially never
+ * also shares a street.
  */
-const MAX_UNMATCHED_RESULTS = 20;
+const MAX_FOCUSED_RESULTS = 20;
 
-export async function findOntopoLink(name: string): Promise<string | null> {
+function normalizeForMatch(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .trim();
+}
+
+/**
+ * Only the street segment (before the first comma), not the full address —
+ * comparing full addresses lets "Tel Aviv" alone count as a match between
+ * two completely unrelated restaurants, since nearly everything in this
+ * app is in Tel Aviv.
+ */
+function streetSegment(address: string): string {
+  return address.split(",")[0] ?? address;
+}
+
+function addressesLikelyMatch(known: string, candidate: string): boolean {
+  const k = normalizeForMatch(streetSegment(known));
+  const c = normalizeForMatch(streetSegment(candidate));
+  if (!k || !c) return false;
+  const meaningfulWords = k.split(" ").filter((word) => word.length >= 3);
+  return meaningfulWords.length > 0 && meaningfulWords.some((word) => c.includes(word));
+}
+
+export async function findOntopoLink(
+  name: string,
+  address: string | null,
+): Promise<string | null> {
   const url =
     `https://ontopo.com/api/venue_search?slug=${ONTOPO_ISRAEL_DISTRIBUTOR_SLUG}` +
     `&version=1&locale=en&terms=${encodeURIComponent(name)}`;
@@ -72,12 +104,21 @@ export async function findOntopoLink(name: string): Promise<string | null> {
     if (!response.ok) return null;
 
     const venues = extractVenues(await response.json());
-    if (venues.length === 0 || venues.length >= MAX_UNMATCHED_RESULTS) return null;
+    if (venues.length === 0) return null;
 
-    const first = venues[0];
-    if (!first?.slug) return null;
+    if (venues.length < MAX_FOCUSED_RESULTS) {
+      const first = venues[0];
+      return first?.slug ? `https://ontopo.com/en/il/page/${first.slug}` : null;
+    }
 
-    return `https://ontopo.com/en/il/page/${first.slug}`;
+    if (address) {
+      const match = venues.find(
+        (venue) => venue.slug && addressesLikelyMatch(address, venue.address ?? ""),
+      );
+      if (match?.slug) return `https://ontopo.com/en/il/page/${match.slug}`;
+    }
+
+    return null;
   } catch (error) {
     console.error("[Alma] findOntopoLink failed:", error);
     return null;
@@ -94,10 +135,10 @@ export async function findOntopoLink(name: string): Promise<string | null> {
  */
 export async function findReservationLink(
   name: string,
-  _address: string | null,
+  address: string | null,
 ): Promise<string | null> {
   const known = findInDirectory(name);
   if (known) return known;
 
-  return findOntopoLink(name);
+  return findOntopoLink(name, address);
 }
