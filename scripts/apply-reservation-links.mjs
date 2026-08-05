@@ -32,6 +32,13 @@ if (!extractedKey) {
 }
 const SERVICE_ROLE_KEY = extractedKey;
 
+// Masked preview only (never the full key) so a wrong/stale copy is
+// diagnosable from the workflow log without re-guessing blind.
+console.log(
+  `Using key: ${SERVICE_ROLE_KEY.slice(0, 14)}...${SERVICE_ROLE_KEY.slice(-4)} ` +
+    `(length ${SERVICE_ROLE_KEY.length})`,
+);
+
 const dirPath = path.join(
   path.dirname(fileURLToPath(import.meta.url)),
   "..",
@@ -56,6 +63,10 @@ async function supabaseFetch(pathAndQuery, init = {}) {
       apikey: SERVICE_ROLE_KEY,
       Authorization: `Bearer ${SERVICE_ROLE_KEY}`,
       "Content-Type": "application/json",
+      // Supabase's secret keys deliberately 401 on requests that look like
+      // they're from a browser (User-Agent sniffing) — make sure this
+      // trusted server-side job never accidentally looks like one.
+      "User-Agent": "alma-reservation-sync/1.0",
       ...(init.headers ?? {}),
     },
   });
