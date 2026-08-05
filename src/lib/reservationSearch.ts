@@ -54,6 +54,13 @@ export async function findOntopoLink(name: string): Promise<string | null> {
     if (!response.ok) return null;
 
     const venues = extractVenues(await response.json());
+    // Temporary diagnostic: log what Ontopo actually returns for each name,
+    // so the matching rule can be tuned against real data instead of guesses.
+    console.log(
+      `[Alma] Ontopo search "${name}" ->`,
+      venues.map((v) => v.title ?? v.name ?? "(no title)"),
+    );
+
     const match = venues.find(
       (venue) => venue.slug && namesLikelyMatch(name, venue.title ?? venue.name ?? ""),
     );
