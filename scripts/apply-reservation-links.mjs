@@ -7,12 +7,27 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
-const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const RAW_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
+if (!SUPABASE_URL || !RAW_SERVICE_ROLE_KEY) {
   console.error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY env vars.");
   process.exit(1);
 }
+
+// Same lesson as the Google Maps key earlier in this project: a key copied
+// from a "reveal" UI can end up with leftover masking characters instead of
+// the real value. Extract the recognizable shape rather than trusting the
+// raw env var as-is.
+const KEY_PATTERN = /sb_secret_[A-Za-z0-9_-]{20,}/;
+const extractedKey = RAW_SERVICE_ROLE_KEY.match(KEY_PATTERN)?.[0];
+if (!extractedKey) {
+  console.error(
+    `SUPABASE_SERVICE_ROLE_KEY (length ${RAW_SERVICE_ROLE_KEY.length}) doesn't look like a ` +
+      "valid Supabase secret key (sb_secret_...). Re-copy it from Supabase's API settings.",
+  );
+  process.exit(1);
+}
+const SERVICE_ROLE_KEY = extractedKey;
 
 const dirPath = path.join(
   path.dirname(fileURLToPath(import.meta.url)),
