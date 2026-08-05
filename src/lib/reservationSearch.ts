@@ -23,6 +23,26 @@ function extractVenues(data: unknown): OntopoVenue[] {
   return [];
 }
 
+function normalize(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .trim();
+}
+
+/**
+ * Ontopo's search is fuzzy and can return a "closest" result even for a
+ * restaurant it doesn't actually have (e.g. a Tabit-only place) — so a
+ * result existing isn't enough; require its name to actually match the
+ * one we searched for before trusting it.
+ */
+function namesLikelyMatch(query: string, candidate: string): boolean {
+  const q = normalize(query);
+  const c = normalize(candidate);
+  if (!q || !c) return false;
+  return q.includes(c) || c.includes(q);
+}
+
 export async function findOntopoLink(name: string): Promise<string | null> {
   const url =
     `https://ontopo.com/api/venue_search?slug=${ONTOPO_ISRAEL_DISTRIBUTOR_SLUG}` +
@@ -33,10 +53,12 @@ export async function findOntopoLink(name: string): Promise<string | null> {
     if (!response.ok) return null;
 
     const venues = extractVenues(await response.json());
-    const first = venues[0];
-    if (!first?.slug) return null;
+    const match = venues.find(
+      (venue) => venue.slug && namesLikelyMatch(name, venue.title ?? venue.name ?? ""),
+    );
+    if (!match?.slug) return null;
 
-    return `https://ontopo.com/en/il/page/${first.slug}`;
+    return `https://ontopo.com/en/il/page/${match.slug}`;
   } catch (error) {
     console.error("[Alma] findOntopoLink failed:", error);
     return null;
