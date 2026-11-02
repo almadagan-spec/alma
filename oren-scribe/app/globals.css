@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+/* Wireframe palette (light blues), taken from design/wireframes.pdf */
+@theme {
+  --color-page: #edf2f9;
+  --color-bar-top: #d6e3f3;
+  --color-bar-sub: #b3cbeb;
+  --color-time: #8eb1e0;
+  --color-box: #f1f5fb;
+  --color-line: #c9d9ee;
+  --color-ink: #1b2b44;
+  --color-muted: #8a97ab;
+  --color-primary: #c6d9f2;
+  --font-sans: var(--font-heebo), Arial, sans-serif;
+}
+
+body {
+  background: var(--color-page);
+  color: var(--color-ink);
+}

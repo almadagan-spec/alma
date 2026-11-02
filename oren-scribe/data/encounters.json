@@ -1,0 +1,44 @@
+{
+  "_note": "Simulated data for a hiring assignment. Response of GET /encounters/{encounter_id} in the fictional Oren EMR.",
+  "encounters": [
+    {
+      "encounter_id": "ENC-48213",
+      "clinic": "Family Medicine, Oren Health - Kiryat Gil",
+      "physician": {"id": "DR-1107", "name": "Dr. Michal Aviv"},
+      "started_at": "2026-10-12T09:20:00+03:00",
+      "status": "open",
+      "patient": {"id": "P-10231", "age": 58, "sex": "M"},
+      "active_problems": ["Type 2 diabetes", "Hypertension"],
+      "medications": [
+        {"name": "Metformin", "dose": "850 mg", "frequency": "twice daily"},
+        {"name": "Norvasc (amlodipine)", "dose": "5 mg", "frequency": "once daily"}
+      ],
+      "allergies": [],
+      "recent_results": [{"test": "HbA1c", "value": 7.4, "unit": "%", "date": "2026-04-03"}]
+    },
+    {
+      "encounter_id": "ENC-48230",
+      "clinic": "Pediatrics, Oren Health - Kiryat Gil",
+      "physician": {"id": "DR-1142", "name": "Dr. Yael Ronen"},
+      "started_at": "2026-10-12T10:05:00+03:00",
+      "status": "open",
+      "patient": {"id": "P-20877", "age": 6, "sex": "F"},
+      "active_problems": [],
+      "medications": [],
+      "allergies": [],
+      "recent_results": [{"test": "Weight", "value": 19.5, "unit": "kg", "date": "2025-11-20"}]
+    },
+    {
+      "encounter_id": "ENC-48247",
+      "clinic": "Family Medicine, Oren Health - Kiryat Gil",
+      "physician": {"id": "DR-1107", "name": "Dr. Michal Aviv"},
+      "started_at": "2026-10-12T10:40:00+03:00",
+      "status": "open",
+      "patient": {"id": "P-31540", "age": 47, "sex": "M"},
+      "active_problems": ["Atrial fibrillation"],
+      "medications": [{"name": "Eliquis (apixaban)", "dose": "5 mg", "frequency": "twice daily"}],
+      "allergies": [],
+      "recent_results": []
+    }
+  ]
+}
